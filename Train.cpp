@@ -159,7 +159,6 @@ void Train::setNewID(int id) {
         throw invalid_argument("Train new ID must be greater than 0");
 }
 
-
 int Train::getID () const {
     return ID;
 }
@@ -231,7 +230,26 @@ bool Train::addTrainToDatabase (int id, int seat, string name, int year, int mon
         sqlite3_finalize(statement);
     }
     sqlite3_close(DB);
+    addNewTableToDataBase(id);
     return successful;
+}
+
+void Train::addNewTableToDataBase(int id) {
+    sqlite3* DB;
+    int result = sqlite3_open("Railway Reservation System.db", &DB);
+
+    if (result != SQLITE_OK)
+        throw invalid_argument("Error at database connection");
+    else{
+        string tableName = "passengers_of_train_" + to_string(id);
+        string query = "CREATE TABLE "+ tableName + " (passenger_seat INTEGER PRIMARY KEY UNIQUE NOT NULL, "
+                                                    "passenger_name TEXT NOT NULL, "
+                                                    "passenger_surname TEXT NOT NULL)";
+        result = sqlite3_exec(DB, query.c_str(), 0, 0, 0);
+
+        if (result != SQLITE_OK)
+            throw invalid_argument("Table creation failed");
+    }
 }
 
 bool Train::deleteTrainFromDatabase (int id) {
@@ -260,8 +278,24 @@ bool Train::deleteTrainFromDatabase (int id) {
         sqlite3_finalize(statement);
     }
     sqlite3_close(DB);
-
+    deleteTableFromDatabase(id);
     return successful;
+}
+
+void Train::deleteTableFromDatabase(int id) {
+    sqlite3* DB;
+    int result = sqlite3_open("Railway Reservation System.db", &DB);
+
+    if (result != SQLITE_OK)
+        throw invalid_argument("Error at database connection");
+    else{
+        string tableName = "passengers_of_train_" + to_string(id);
+        string query = "DROP TABLE " + tableName;
+        result = sqlite3_exec(DB, query.c_str(), 0, 0, 0);
+
+        if (result != SQLITE_OK)
+            throw invalid_argument("Table deletion failed");
+    }
 }
 
 bool Train::changeTrainInformationInDatabase (int id, int seat, string name, int year, int month, int day, int hour,
@@ -344,7 +378,29 @@ bool Train::changeTrainInformationInDatabase (int id, int seat, string name, int
     }
     sqlite3_close(DB);
 
+    if (newid != id)
+    {
+        changeTableInDatabase(id, newid);
+    }
+
     return successful;
+}
+
+void Train::changeTableInDatabase(int id, int newid) {
+    sqlite3* DB;
+    int result = sqlite3_open("Railway Reservation System.db", &DB);
+
+    if (result != SQLITE_OK)
+        throw invalid_argument("Error at database connection");
+    else{
+        string tableName = "passengers_of_train_" + to_string(id);
+        string newTableName = "passengers_of_train_" + to_string(newid);
+        string query = "ALTER TABLE " + tableName + " RENAME TO " + newTableName;
+        result = sqlite3_exec(DB, query.c_str(), 0, 0, 0);
+
+        if (result != SQLITE_OK)
+            throw invalid_argument("Table renaming failed");
+    }
 }
 
 void Train::readInformation () {

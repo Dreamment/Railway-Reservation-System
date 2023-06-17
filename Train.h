@@ -29,8 +29,11 @@ public:
     int getMinute () const;
     int getNewID () const;
     bool addTrainToDatabase (int id, int seat, string name, int year, int month, int day, int hour, int minute);
+    void addNewTableToDataBase(int id);
     bool deleteTrainFromDatabase (int id);
+    void deleteTableFromDatabase(int id);
     bool changeTrainInformationInDatabase (int id, int seat, string name, int year, int month, int day, int hour, int minute, int newid);
+    void changeTableInDatabase(int id, int newid);
     void readInformation ();
     void printInformation ();
 private:
@@ -43,6 +46,7 @@ private:
     int trainDepartureHour;
     int trainDepartureMinute;
     int newID;
+protected:
     vector <int> ids;
     vector <int> seats;
     vector <string> names;
