@@ -8,15 +8,17 @@ class Admin
 public:
     explicit Admin ();
     ~Admin();
-    int randomPasswordGenerator();
+    string randomPasswordGenerator();
     int login();
     bool passwordChange();
+    void createAdmin();
 private:
-    int randomPassword;
-    int enteredPassword;
-    int newPassword;
-    int newPasswordAgain;
-    int checkPassword;
+    string randomPassword;
+    string enteredPassword;
+    string newPassword;
+    string newPasswordAgain;
+    string checkPassword;
+    string username;
 };
 
 #endif
