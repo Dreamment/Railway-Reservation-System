@@ -242,10 +242,11 @@ void Train::addNewTableToDataBase(int id) {
         throw invalid_argument("Error at database connection");
     else{
         string tableName = "passengers_of_train_" + to_string(id);
-        string query = "CREATE TABLE "+ tableName + " (passenger_seat INTEGER PRIMARY KEY UNIQUE NOT NULL, "
+        string query = "CREATE TABLE "+ tableName + " (passenger_id TEXT PRIMARY KEY UNIQUE NOT NULL, "
+                                                    "passenger_seat INTEGER UNIQUE NOT NULL, "
                                                     "passenger_name TEXT NOT NULL, "
                                                     "passenger_surname TEXT NOT NULL)";
-        result = sqlite3_exec(DB, query.c_str(), 0, 0, 0);
+        result = sqlite3_exec(DB, query.c_str(), nullptr, nullptr, nullptr);
 
         if (result != SQLITE_OK)
             throw invalid_argument("Table creation failed");
@@ -263,7 +264,7 @@ bool Train::deleteTrainFromDatabase (int id) {
     else{
         string query = "DELETE FROM trains WHERE train_id = ?";
         sqlite3_stmt* statement;
-        result = sqlite3_prepare_v2(DB, query.c_str(), -1, &statement, 0);
+        result = sqlite3_prepare_v2(DB, query.c_str(), -1, &statement, nullptr);
 
         if (result != SQLITE_OK)
             throw invalid_argument("Query preparation failed");
@@ -291,7 +292,7 @@ void Train::deleteTableFromDatabase(int id) {
     else{
         string tableName = "passengers_of_train_" + to_string(id);
         string query = "DROP TABLE " + tableName;
-        result = sqlite3_exec(DB, query.c_str(), 0, 0, 0);
+        result = sqlite3_exec(DB, query.c_str(), nullptr, nullptr, nullptr);
 
         if (result != SQLITE_OK)
             throw invalid_argument("Table deletion failed");
@@ -357,7 +358,7 @@ bool Train::changeTrainInformationInDatabase (int id, int seat, string name, int
         string query = "UPDATE trains SET train_id = ?, train_name = ?, train_departure_date = ?, "
                        "train_departure_time = ?, train_seat = ? WHERE train_id = ?";
         sqlite3_stmt* statement;
-        result = sqlite3_prepare_v2(DB, query.c_str(), -1, &statement, 0);
+        result = sqlite3_prepare_v2(DB, query.c_str(), -1, &statement, nullptr);
         if(result != SQLITE_OK)
             throw invalid_argument("Query preparation failed");
         else{
@@ -412,7 +413,7 @@ void Train::readInformation () {
     else{
         string query = "SELECT * FROM trains ";
         sqlite3_stmt* statement;
-        result = sqlite3_prepare_v2(DB, query.c_str(), -1, &statement, 0);
+        result = sqlite3_prepare_v2(DB, query.c_str(), -1, &statement, nullptr);
 
         if (result != SQLITE_OK)
             throw invalid_argument("Query preparation failed");
