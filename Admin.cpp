@@ -44,7 +44,7 @@ int Admin::login(){
     system("CLS");
     cout<<"\n\n\t\tWelcome to Railway Reservation System";
     sqlite3* DB;
-    int result = sqlite3_open("Railway.db", &DB);
+    int result = sqlite3_open("Railway Reservation System.db", &DB);
 
     if (result != SQLITE_OK)
         throw invalid_argument("Cannot open database");
@@ -119,6 +119,7 @@ int Admin::login(){
 bool Admin::passwordChange()
 {
     bool successful=false;
+    bool flag = false;
 
     sqlite3*DB;
     int result = sqlite3_open("Railway Reservation System.db", &DB);
@@ -127,7 +128,7 @@ bool Admin::passwordChange()
     else{
         string query = "UPDATE admin SET password = ? WHERE username = ?";
         sqlite3_stmt* statement;
-        result = sqlite3_prepare_v2(DB, query.c_str(), -1, &statement, 0);
+        result = sqlite3_prepare_v2(DB, query.c_str(), -1, &statement, nullptr);
         if (result != SQLITE_OK)
             throw invalid_argument("Cannot create statement");
         else{
@@ -153,13 +154,27 @@ bool Admin::passwordChange()
                     for (int i = 0; i < 20; i++){
                         char ch2 = _getch();
                         if (ch2 == 'r'){
-                            break;
+                            if (newPassword.empty())
+                            {
+                                cout <<"\n\t\t You need to enter at least 1 character."
+                                        "\n\t\t Please try again:";
+                                i--;
+                                continue;
+                            }
+                            else
+                                break;
                         }
                         else if (ch2 == '\b'){
                             if (!newPassword.empty())
                             {
                                 cout << "\b \b";
                                 newPassword.erase(newPassword.size() - 1);
+                            }
+                            else{
+                                cout<<"\n\t\t You need to enter at least 1 character."
+                                        "\n\t\t Please try again:";
+                                i--;
+                                continue;
                             }
                         }
                         else{
@@ -170,18 +185,31 @@ bool Admin::passwordChange()
                 } while (newPassword.length()<21 && newPassword.length()>0);
                 do {
                     newPasswordAgain="";
-                    newPasswordAgain="";
                     cout<<"\n\t\tEnter New Password Again(Max 20 characters): ";
                     for (int i = 0; i < 20; i++){
                         char ch2 = _getch();
                         if (ch2 == 'r'){
-                            break;
+                            if (newPassword.empty())
+                            {
+                                cout <<"\n\t\t You need to enter at least 1 character."
+                                       "\n\t\t Please try again:";
+                                i--;
+                                continue;
+                            }
+                            else
+                                break;
                         }
                         else if (ch2 == '\b'){
                             if (!newPasswordAgain.empty())
                             {
                                 cout << "\b \b";
                                 newPasswordAgain.erase(newPasswordAgain.size() - 1);
+                            }
+                            else{
+                                cout<<"\n\t\t You need to enter at least 1 character."
+                                      "\n\t\t Please try again:";
+                                i--;
+                                continue;
                             }
                         }
                         else{
@@ -198,23 +226,22 @@ bool Admin::passwordChange()
                     cout<<"\n\t\tYour passwords doesn't match 3 times in a row."
                           "\n\t\tYou will be logged out.";
                 }
-                else if (newPassword==newPasswordAgain){
-
-                    successful=true;
-                }
-                else{
+                else if (newPassword != newPasswordAgain){
                     attempt++;
                     cout<<"\n\t\tPassword doesn't match.";
                     cout<<"\n\t\tPlease enter same password: ";
                     goto password;
                 }
+                else
+                    flag=true;
             }
             else
             {
                 newPassword=randomPasswordGenerator();
-                successful=true;
+                cout<<"\n\n\t\tYour new password is: "<<newPassword;
+                flag = true;
             }
-            if (successful){
+            if (flag){
                 sqlite3_bind_text(statement, 1, newPassword.c_str(), -1, SQLITE_STATIC);
                 sqlite3_bind_text(statement, 2, username.c_str(), -1, SQLITE_STATIC);
                 result = sqlite3_step(statement);
@@ -222,6 +249,7 @@ bool Admin::passwordChange()
                     throw invalid_argument("Cannot execute statement");
                 else{
                     cout<<"\n\n\t\tPassword changed successfully.";
+                    successful=true;
                 }
             }
             sqlite3_finalize(statement);
@@ -265,5 +293,4 @@ void Admin::createAdmin() {
                 cout << "\n\n\t\tAdmin created successfully.";
         }
     }
-
 }
