@@ -12,6 +12,15 @@ using namespace std;
 Passenger::Passenger(int trainID,string passengerId, string passengerName, string passengerSurname, int passengerSeat,
                      string passengerNewName, string passengerNewSurname, int passengerNewSeat) {
     readInformation();
+    this->trainId = trainID;
+    this->passengerId = passengerId;
+    this->passengerName = passengerName;
+    this->passengerSurname = passengerSurname;
+    this->passengerSeat = passengerSeat;
+    this->passengerNewName = passengerNewName;
+    this->passengerNewSurname = passengerNewSurname;
+    this->passengerNewSeat = passengerNewSeat;
+    /*
     setPassengerTrainID(trainID);
     setPassengerId(passengerId);
     setPassengerName(passengerName);
@@ -20,6 +29,7 @@ Passenger::Passenger(int trainID,string passengerId, string passengerName, strin
     setPassengerNewName(passengerNewName);
     setPassengerNewSurname(passengerNewSurname);
     setPassengerNewSeat(passengerNewSeat, trainID);
+     */
 
 }
 
@@ -35,16 +45,16 @@ void Passenger::setPassengerTrainID(int id) {
         }
     }
     if(!flag){
-        throw invalid_argument("Invalid train ID");
+        throw invalid_argument("There is no train with this ID");
     }
 }
 
-void Passenger::setPassengerId(string id) {
+void Passenger::setPassengerId(const string& id) {
     bool flag = false;
-    for (int i : ids){
+    for (size_t i = 0; i < ids.size(); ++i){
         if (i == trainId){
-            for (size_t j = 0; j < passengerIds.size(); j++) {
-                if (passengerIds[j] == id){
+            for (const auto & passengerID : passengerIds) {
+                if (passengerID == id){
                     flag = true;
                     break;
                 }
@@ -72,19 +82,24 @@ void Passenger::setPassengerSurname(string surname) {
         throw invalid_argument("Passenger surname is too long");
 }
 
-void Passenger::setPassengerSeat(int seat, int id) {
+void Passenger::setPassengerSeat(int seat) {
     bool flag = false;
-    for (int i : ids) {
-        if (i == id){
-            if (seat <= seats[i] && seat > 0){
+    if (seat < 1)
+        throw invalid_argument("Seat number must be greater than 0");
+    for (size_t i = 0; i < ids.size(); i++) {
+        if (ids[i] == trainId){
+            if (seat <= seats[i]){
                 passengerSeat = seat;
                 flag = true;
                 break;
             }
+            else{
+                throw invalid_argument("Seat number is greater than the number of seats in the train");
+            }
         }
     }
     if (!flag)
-        throw invalid_argument("Invalid seat number");
+        throw invalid_argument("Invalid train ID");
 }
 
 void Passenger::setPassengerNewName(string name) {
@@ -124,16 +139,18 @@ bool Passenger::addPassengerToDatabase(int id, int seat, string name, string sur
     int result = sqlite3_open("Railway Reservation System.db", &DB);
 
     if (result != SQLITE_OK) {
-        throw invalid_argument("Cannot open database");
+        const char* errorMessage = sqlite3_errmsg(DB);
+        throw invalid_argument("Cannot open database" + string(errorMessage));
     }
     else {
         string tableName = "passengers_of_train_" + to_string(id);
-        string query = "INSERT INTO"+ tableName +" (passenger_id, passenger_seat, passenger_name, passenger_surname) VALUES (?, ?, ?, ?)";
+        string query = "INSERT INTO "+ tableName +" (passenger_id, passenger_seat, passenger_name, passenger_surname) VALUES (?, ?, ?, ?)";
         sqlite3_stmt* statement;
         result = sqlite3_prepare_v2(DB, query.c_str(), -1, &statement, 0);
 
         if (result != SQLITE_OK) {
-            throw invalid_argument("Cannot create statement");
+            const char* errorMessage = sqlite3_errmsg(DB);
+            throw invalid_argument("Cannot create statement" + string(errorMessage));
         }
         else{
             string _id;
@@ -151,8 +168,10 @@ bool Passenger::addPassengerToDatabase(int id, int seat, string name, string sur
 
             result = sqlite3_step(statement);
 
-            if (result != SQLITE_DONE)
-                throw invalid_argument("Cannot execute statement");
+            if (result != SQLITE_DONE){
+                const char* errorMessage = sqlite3_errmsg(DB);
+                throw invalid_argument("Cannot execute statement" + string(errorMessage));
+            }
             else
                 successful = true;
         }
@@ -170,25 +189,36 @@ bool Passenger::deletePassengerFromDatabase(int id, string passengerID) {
     sqlite3* DB;
     int result = sqlite3_open("Railway Reservation System.db", &DB);
 
-    if (result != SQLITE_OK)
-        throw invalid_argument("Cannot open database");
+    if (result != SQLITE_OK){
+        const char* errorMessage = sqlite3_errmsg(DB);
+        throw invalid_argument("Cannot open database: " + string(errorMessage));
+    }
     else {
         string tableName = "passengers_of_train_" + to_string(id);
         string query = "DELETE FROM " + tableName + " WHERE passenger_id = ?";
         sqlite3_stmt* statement;
         result = sqlite3_prepare_v2(DB, query.c_str(), -1, &statement, 0);
 
-        if (result != SQLITE_OK)
-            throw invalid_argument("Cannot create statement");
+        if (result != SQLITE_OK){
+            const char* errorMessage = sqlite3_errmsg(DB);
+            throw invalid_argument("Cannot create statement: " + string(errorMessage));
+        }
         else {
             sqlite3_bind_text(statement, 1, passengerID.c_str(), -1, SQLITE_STATIC);
 
             result = sqlite3_step(statement);
 
-            if (result != SQLITE_DONE)
-                throw invalid_argument("Cannot execute statement");
-            else
-                successful = true;
+            if (result == SQLITE_DONE){
+                int effectedRows = sqlite3_changes(DB);
+                if (effectedRows == 0)
+                    throw invalid_argument("Invalid passenger ID");
+                else
+                    successful = true;
+            }
+            else{
+                const char* errorMessage = sqlite3_errmsg(DB);
+                throw invalid_argument("Cannot execute statement: " + string(errorMessage));
+            }
         }
         sqlite3_finalize(statement);
     }

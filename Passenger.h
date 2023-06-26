@@ -11,10 +11,10 @@ public:
                        int passengerNewSeat = 1);
     ~Passenger();
     void setPassengerTrainID(int id);
-    void setPassengerId(string id);
+    void setPassengerId(const string& id);
     void setPassengerName(string name);
     void setPassengerSurname(string surname);
-    void setPassengerSeat(int seat, int id);
+    void setPassengerSeat(int seat);
     void setPassengerNewName(string name);
     void setPassengerNewSurname(string surname);
     void setPassengerNewSeat(int seat, int id);

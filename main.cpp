@@ -522,20 +522,23 @@ int main (){
             int response;
             system("cls");
             cout<<"\n\n\t\tRailway Reservation System"
+                  "\n\t\tUser Menu"
                   "\n\n\t\t1.Show Trains"
                   "\n\t\t2.Book Ticket"
                   "\n\t\t3.Cancel Ticket"
                   "\n\t\t4.Main Menu"
                   "\n\t\t0.Exit System"
                   "\n\n\t\tChoose an option: ";
-            char ch2 = _getch();
+            char ch = _getch();
             fflush(stdin);
-            response = ch2 - '0';
+            response = ch - '0';
+            cout << response;
             while (response != 1 && response != 2 && response != 3 && response != 4 && response != 0) {
                 cout << "\n\t\tInvalid option. Please try again: ";
-                ch2 = _getch();
+                ch = _getch();
                 fflush(stdin);
-                response = ch2 - '0';
+                response = ch - '0';
+                cout << response;
             }
             while (response == 1){
                 Train myTrain;
@@ -547,19 +550,67 @@ int main (){
                 break;
             }
             while (response == 2){
+                system("cls");
+                cout<<"\n\n\t\tRailway Reservation System"
+                      "\n\t\tBook Ticket Menu";
+                bool flag = true;
                 Passenger myPassenger;
                 int trainNumber;
                 cout<<"\n\n\t\tEnter train number: ";
                 cin>>trainNumber;
+                try{
+                    myPassenger.setPassengerTrainID(trainNumber);
+                }
+                catch (invalid_argument &e){
+                    flag = false;
+                    cerr<<"\n\n\t\tError while setting passenger train id: "<<e.what()<<endl;
+                    cout<<"\n\n\t\tPress any key to continue.";
+                    _getch();
+                }
+                if (!flag)
+                    break;
                 int seatNumber;
                 cout<<"\n\n\t\tEnter seat number: ";
                 cin>>seatNumber;
+                try{
+                    myPassenger.setPassengerSeat(seatNumber);
+                }
+                catch (invalid_argument &e){
+                    flag = false;
+                    cerr<<"\n\n\t\tError while setting passenger seat number: "<<e.what()<<endl;
+                    cout<<"\n\n\t\tPress any key to continue.";
+                    _getch();
+                }
+                if (!flag)
+                    break;
                 string passengerName;
                 cout<<"\n\n\t\tEnter passenger name: ";
                 cin>>passengerName;
+                try{
+                    myPassenger.setPassengerName(passengerName);
+                }
+                catch (invalid_argument &e){
+                    flag = false;
+                    cerr<<"\n\n\t\tError while setting passenger name: "<<e.what()<<endl;
+                    cout<<"\n\n\t\tPress any key to continue.";
+                    _getch();
+                }
+                if (!flag)
+                    break;
                 string passengerSurname;
                 cout<<"\n\n\t\tEnter passenger surname: ";
                 cin>>passengerSurname;
+                try{
+                    myPassenger.setPassengerSurname(passengerSurname);
+                }
+                catch (invalid_argument &e){
+                    flag = false;
+                    cerr<<"\n\n\t\tError while setting passenger surname: "<<e.what()<<endl;
+                    cout<<"\n\n\t\tPress any key to continue.";
+                    _getch();
+                }
+                if (!flag)
+                    break;
 
                 bool check = false;
                 try{
@@ -578,24 +629,74 @@ int main (){
 
                 cout<<"\n\n\t\tDo you want to book another ticket? (y/n): ";
                 char ch2 = _getch();
+                cout << ch2;
                 fflush(stdin);
                 while (ch2 != 'y' && ch2 != 'Y' && ch2 != 'n' && ch2 != 'N'){
                     cout<<"\n\n\t\tInvalid option. Please try again: ";
                     ch2 = _getch();
                     fflush(stdin);
+                    cout << ch2;
                 }
                 if (ch2 == 'n' || ch2 == 'N')
                     break;
             }
             while (response == 3){
+                system("cls");
+                cout<<"\n\n\t\tRailway Reservation System"
+                      "\n\t\tCancel Ticket Menu";
                 Passenger myPassenger;
                 int trainNumber;
                 cout<<"\n\n\t\tEnter train number: ";
                 cin>>trainNumber;
+                fflush(stdin);
+                try{
+                    myPassenger.setPassengerTrainID(trainNumber);
+                }
+                catch (invalid_argument &e){
+                    cerr<<"\n\n\t\tError while setting passenger train id: "<<e.what()<<endl;
+                }
                 string passengerId;
+                passengerId = "";
                 cout<<"\n\n\t\tEnter id number: ";
-                getline(cin, passengerId);
-
+                for (int i = 0; i < 5;){
+                    char ch2 = _getch();
+                    if (ch2 == '\r'){
+                        if(passengerId.empty()){
+                            cout<<"\n\t\tYou need to enter 5 characters. "
+                                  "\n\t\tPlease try again: ";
+                            i = 0;
+                            continue;
+                        }
+                        else if (passengerId.length() == 5)
+                            break;
+                        else{
+                            cout<<"\n\t\tYou need to enter 5 characters. "
+                                  "\n\t\tPlease try again: ";
+                            i = 0;
+                            passengerId.clear();
+                            continue;
+                        }
+                    }
+                    else if (ch2 == '\b'){
+                        if(!passengerId.empty()){
+                            cout<<"\b \b";
+                            passengerId.erase(passengerId.length() - 1);
+                            i--;
+                        }
+                        else{
+                            cout<<"\n\t\tYou need to enter at least 1 character. "
+                                  "\n\t\tPlease try again: ";
+                            i=0;
+                            continue;
+                        }
+                    }
+                    else{
+                        cout<<ch2;
+                        passengerId += ch2;
+                        i++;
+                    }
+                }
+                fflush(stdin);
                 bool check = false;
                 try {
                     check = myPassenger.deletePassengerFromDatabase(trainNumber, passengerId);

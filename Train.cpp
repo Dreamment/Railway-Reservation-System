@@ -7,19 +7,18 @@
 using namespace std;
 
 Train::Train(int id, int seat, string name, int year, int month, int day, int hour, int minute, int newID) {
-    setTrainID(id);
-    setTrainSeat(seat);
-    setTrainName(name);
-    setYear(year);
-    setMonth(month);
-    setDay(day, month);
-    setTime(hour, minute);
-    setNewID(newID);
+    this->ID = id;
+    this->trainSeat = seat;
+    this->trainName = name;
+    this->trainDepartureYear = year;
+    this->trainDepartureMonth = month;
+    this->trainDepartureDay = day;
+    this->trainDepartureHour = hour;
+    this->trainDepartureMinute = minute;
+    this->newID = newID;
 }
 
-Train::~Train() {
-
-}
+Train::~Train() = default;
 
 void Train::setTrainID(int id) {
     if (id > 0)
@@ -405,6 +404,11 @@ void Train::changeTableInDatabase(int id, int newid) {
 }
 
 void Train::readInformation () {
+    ids.clear();
+    names.clear();
+    dates.clear();
+    times.clear();
+    seats.clear();
     sqlite3* DB;
     int result = sqlite3_open("Railway Reservation System.db", &DB);
 
@@ -420,7 +424,7 @@ void Train::readInformation () {
         else{
             while (sqlite3_step(statement) == SQLITE_ROW){
                 int id = sqlite3_column_int(statement, 0);
-                ids.push_back(ID);
+                ids.push_back(id);
 
                 string NAME = reinterpret_cast<const char*>(sqlite3_column_text(statement, 1));
                 names.push_back(NAME);
@@ -441,20 +445,23 @@ void Train::readInformation () {
 }
 
 void Train::printInformation() {
+    system("cls");
     int biggestID = 0;
-    for (size_t i = 0; i < ids.size(); i++){
-        if (ids[i] > biggestID)
-            biggestID = ids[i];
+    for (int id : ids){
+        if (id > biggestID)
+            biggestID = id;
     }
     int digitOfBiggestID = 0;
     while (biggestID != 0){
         biggestID /= 10;
         digitOfBiggestID++;
     }
+    if (digitOfBiggestID == 1)
+        digitOfBiggestID = 2;
     int biggestSeat = 0;
-    for (size_t i = 0; i < seats.size(); i++){
-        if (seats[i] > biggestSeat)
-            biggestSeat = seats[i];
+    for (int seat : seats){
+        if (seat > biggestSeat)
+            biggestSeat = seat;
     }
     int digitOfBiggestSeat = 0;
     while (biggestSeat != 0){
@@ -463,17 +470,25 @@ void Train::printInformation() {
     }
     if (digitOfBiggestSeat < 4)
         digitOfBiggestSeat = 4;
-    int width = 69 + digitOfBiggestID + digitOfBiggestSeat;
+    int width = 71 + digitOfBiggestID + digitOfBiggestSeat;
+
+    int widthOfTrains[2] = {(width - 7)/2, (width - 7)/2 + (width - 7)%2};
     cout << setfill('-')<<setw(width)<<"-"<<endl
-            <<"|"<<setfill(' ')<<setw(width)<<"Trains"<<"|"<<endl
-            <<setfill('-')<<setw(width)<<"-"<<endl
-            <<"|"<<setfill(' ')<<setw(digitOfBiggestID)<<"ID"<<"|"<<setfill(' ')<<setw(50)<<"Name"<<"|"
-            <<setfill(' ')<<setw(10)<<"Date"<<"|"<<left<<setw(5)<<"Time"<<"|"<<setfill(' ')
-            <<setw(digitOfBiggestSeat)<<"Seat"<<"|\n"
-            <<setfill('-')<<setw(width)<<"-"<<endl;
+         <<"|"<<setfill(' ')<<setw(widthOfTrains[0])<<" "<<"Trains"<<setfill(' ')<<setw(widthOfTrains[1])<<"|"<<endl
+         <<setfill('-')<<setw(width)<<"-"<<endl
+         <<"|"<<setfill(' ')<<setw(digitOfBiggestID)<<"ID"
+         <<"|"<<setfill(' ')<<setw(23)<<" "<<left<<setfill(' ')<<setw(27)<<"Name"
+         <<"|"<<right<<setfill(' ')<<setw(10)<<"Date   "
+         <<"|"<<left<<setfill(' ')<<setw(5)<<"Time"
+         <<"|"<<left<<setfill(' ')<<setw(digitOfBiggestSeat)<<"Seat"<<"|\n"
+         <<setfill('-')<<setw(width)<<"-"<<endl;
     for (size_t i = 0; i < ids.size(); i++){
-        cout<<"|"<<right<<setfill(' ')<<setw(digitOfBiggestID)<<ids[i]<<"|"
-            <<left<<setfill(' ')<<setw(50)<<names[i]<<"|"
+        int temp = static_cast<int>(names[i].length());
+        int widthOfName[2] = {(50 - temp)/2, (50 - temp)/2};
+        if (temp % 2 == 1)
+            widthOfName[0]++;
+        cout<<"|"<<right<<setfill(' ')<<setw(digitOfBiggestID)<<ids[i]
+            <<"|"<<setfill(' ')<<setw(widthOfName[0])<<" "<<names[i]<<setfill(' ')<<setw(widthOfName[1])<<" "<<"|"
             <<setfill(' ')<<setw(10)<<dates[i]<<"|"
             <<setw(5)<<times[i]<<"|"
             <<right<<setfill(' ')<<setw(digitOfBiggestSeat)<<seats[i]<<"|\n";
