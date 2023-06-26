@@ -20,14 +20,12 @@ string Admin::randomPasswordGenerator(){
     int length=0;
     cout<< "\n\t\tPassword Length: ";
     cin>>length;
-    do{
-        if (length>20 || length<1){
+    while (length > 20 || length < 1){
             cout<<"\n\t\tInvalid length."
                   "\n\t\tPassword length should be between 1 and 20."
                   "\n\t\tPlease try again: ";
             cin>>length;
-        }
-    } while (length<21 && length>0);
+    }
     fflush(stdin);
     const string characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()";
     random_device rd;
@@ -308,13 +306,34 @@ void Admin::createAdmin() {
             throw invalid_argument("Cannot prepare statement" + string(errorMessage));
         }
         else {
+            cout<<"\n\n\t\tDou you want to add password randomly or normal?"
+                  "\n\t\t1. Manuel"
+                  "\n\t\t2. Random"
+                  "\n\t\tChoose an option: ";
+            char ch = _getch();
+            fflush(stdin);
+            int response = ch - '0';
+            cout << response;
+            while (response != 1 && response != 2){
+                cout<<"\n\t\tInvalid option. Please try again: ";
+                ch = _getch();
+                fflush(stdin);
+                response = ch - '0';
+                cout << response;
+            }
             cout<<"\n\n\t\tEnter username: ";
             string userName;
             cin>>userName;
             fflush(stdin);
-            cout<<"\n\t\tEnter password: ";
             string password;
-            cin>>password;
+            if (response == 1){
+                cout<<"\n\t\tEnter password: ";
+                cin>>password;
+            }
+            else{
+                password = randomPasswordGenerator();
+                cout<<"\n\t\tYour password is: "<< password;
+            }
             fflush(stdin);
             sqlite3_bind_text(statement, 1, userName.c_str(), -1, SQLITE_STATIC);
             sqlite3_bind_text(statement, 2, password.c_str(), -1, SQLITE_STATIC);
@@ -326,7 +345,11 @@ void Admin::createAdmin() {
             else
                 cout << "\n\n\t\tAdmin created successfully.";
         }
+        sqlite3_finalize(statement);
     }
+    sqlite3_close(DB);
+    cout<<"\n\t\tPress something to continue.";
+    _getch();
 }
 
 bool Admin::checkAdmin() {
