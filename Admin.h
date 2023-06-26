@@ -13,6 +13,7 @@ public:
     bool passwordChange();
     void createAdmin();
     bool checkAdmin();
+    bool deleteAdmin();
 private:
     string randomPassword;
     string enteredPassword;

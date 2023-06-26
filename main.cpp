@@ -29,7 +29,7 @@ int main (){
                   "\n\t\tAdmin Menu"
                   "\n\n\t\t1. Train Menu"
                   "\n\t\t2. Passenger Menu"
-                  "\n\t\t3. Change Password"
+                  "\n\t\t3. Admin Settings"
                   "\n\t\t4. Main Menu"
                   "\n\t\t0. Exit System"
                   "\n\n\t\tChoose an option: ";
@@ -486,26 +486,102 @@ int main (){
                 }
             }
             while(response == 3){
-                bool check = false;
-                try {
-                    check = myAdmin.passwordChange();
-                }
-                catch (invalid_argument &e){
-                    cerr<<"\n\n\t\tError while changing password: "<<e.what();
-                }
-                if(check){
-                    cout << "\n\n\t\tYou are redirected to the main menu.";
-                    _getch();
+                system("cls");
+                cout<<"\n\n\t\tRailway Reservation System"
+                      "\n\t\tAdmin Settings"
+                      "\n\n\t\t1.Add New Admin"
+                      "\n\t\t2.Delete Admin(Current Admin)"
+                      "\n\t\t3.Change Password(Current Admin)"
+                      "\n\t\t4.Previous Menu"
+                      "\n\t\t5.Main Menu"
+                      "\n\t\t0.Exit System"
+                      "\n\n\t\tChoose an option: ";
+                char ch2 = _getch();
+                fflush(stdin);
+                int response2 = ch2 - '0';
+                cout << response2;
+                while (response2 != 1 && response2 != 2 && response2 != 3 && response2 != 4 && response2 != 5 && response2 != 0) {
+                    cout << "\n\t\tInvalid option. Please try again: ";
+                    ch2 = _getch();
                     fflush(stdin);
-                    login = -1;
+                    response2 = ch2 - '0';
+                    cout << response2;
+                }
+                while(response2 == 1){
+                    try{
+                        myAdmin.createAdmin();
+                        cout<<"\n\t\tYou are redirecting to main menu."
+                              "\n\t\tPress any key to continue.";
+                        _getch();
+                        fflush(stdin);
+                        response2 = 5;
+                        break;
+                    }
+                    catch (invalid_argument &e){
+                        cerr<<"\n\n\t\tError while creating admin: "<<e.what();
+                        cout<<"\n\t\tPress any key to exit.";
+                        _getch();
+                        fflush(stdin);
+                        response2 = 0;
+                        break;
+                    }
+                }
+                while(response2 == 2){
+                    system("cls");
+                    cout<<"\n\n\t\tRailway Reservation System"
+                          "\n\t\tDelete Admin Menu";
+                    bool check = myAdmin.deleteAdmin();
+                    if(check){
+                        cout<<"\n\n\t\tAdmin deleted successfully."
+                              "\n\t\tPress any key to exit.";
+                        _getch();
+                        fflush(stdin);
+                        response2 = 0;
+                        break;
+                    }
+                    else{
+                        cout<<"\n\n\t\tAdmin could not be deleted."
+                              "\n\t\tPress any key to exit.";
+                        _getch();
+                        fflush(stdin);
+                        response2 = 0;
+                        break;
+                    }
+                }
+                while(response2 == 3){
+                    bool check = false;
+                    try {
+                        check = myAdmin.passwordChange();
+                    }
+                    catch (invalid_argument &e){
+                        cerr<<"\n\n\t\tError while changing password: "<<e.what();
+                    }
+                    if(check){
+                        cout << "\n\n\t\tYou are redirected to the main menu.";
+                        _getch();
+                        fflush(stdin);
+                        response2 = 5;
+                        break;
+                    }
+                    else{
+                        cout<<"\n\n\t\tPassword could not be changed."
+                              "\n\t\tPress any key to exit.";
+                        _getch();
+                        fflush(stdin);
+                        response2 = 0;
+                        break;
+                    }
+                }
+                while(response2 == 4){
+                    response = -1;
                     break;
                 }
-                else{
-                    cout<<"\n\n\t\tPassword could not be changed."
-                          "\n\t\tPress any key to continue.";
-                    _getch();
-                    fflush(stdin);
-                    login = 0;
+                while(response2 == 5){
+                    response = 4;
+                    break;
+                }
+                while(response2 == 0){
+                    response = 0;
                     break;
                 }
             }

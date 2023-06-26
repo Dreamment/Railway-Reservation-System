@@ -299,7 +299,7 @@ bool Passenger::changePassengerInDatabase(int id, string passengerID, int newsea
 
 string Passenger::randomPassengerId() {
     string id;
-    const string characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    const string characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789";
     random_device rd;
     mt19937 generator(rd());
     uniform_int_distribution<> distribution(0, characters.size() - 1);
