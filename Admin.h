@@ -12,6 +12,7 @@ public:
     int login();
     bool passwordChange();
     void createAdmin();
+    bool checkAdmin();
 private:
     string randomPassword;
     string enteredPassword;

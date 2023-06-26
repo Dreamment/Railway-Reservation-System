@@ -10,7 +10,14 @@ using namespace std;
 int main (){
     while (true){
         Admin myAdmin;
-        int login=myAdmin.login();
+        int login = -1;
+        try{
+            login=myAdmin.login();
+        }
+        catch(invalid_argument &e){
+            cerr<<"\n\n\t\tError while logging in: "<<e.what();
+        }
+
         // succesfull admin login -> login = 1
         // succesfull user login -> login = 2
         // unsuccesfull login -> login = 3

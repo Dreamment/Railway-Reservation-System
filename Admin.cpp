@@ -40,9 +40,11 @@ string Admin::randomPasswordGenerator(){
 }
 
 int Admin::login(){
-    bool flag = false;
     system("CLS");
     cout<<"\n\n\t\tWelcome to Railway Reservation System";
+
+    bool check = checkAdmin();
+
     sqlite3* DB;
     int result = sqlite3_open("Railway Reservation System.db", &DB);
 
@@ -62,40 +64,69 @@ int Admin::login(){
                   "\n\t\t0.Exit System"
                   "\n\n\t\tChoose an option: ";
             char ch = _getch();
-            while (response != '1' && response != '2' && response != '0') {
+            cout<<ch;
+            response = ch - '0';
+            while (response != 1 && response != 2 && response != 0) {
                 cout << "\n\t\tInvalid option. Please try again: ";
                 ch = _getch();
+                response = ch - '0';
             }
-            response = ch - '0';
 
-            if (response == 1){
-                cout<<"\n\n\t\tEnter username: ";
-                cin>>username;
-                fflush(stdin);
-                cout<<"\n\t\tEnter password: ";
-                cin>>enteredPassword;
-                fflush(stdin);
-                while (sqlite3_step(statement) == SQLITE_ROW) {
-                    flag = true;
-                    if (username == (char*)sqlite3_column_text(statement, 0) &&
-                        enteredPassword == (char*)sqlite3_column_text(statement, 1)) {
-                        cout << "\n\n\t\tLogin successful.";
-                        sqlite3_finalize(statement);
-                        sqlite3_close(DB);
-                        return 1;
+            if(check){
+                if (response == 1){
+                    cout<<"\n\n\t\tEnter username: ";
+                    cin>>username;
+                    fflush(stdin);
+                    cout<<"\n\t\tEnter password: ";
+                    for(int i = 0; i< 20;){
+                        char ch2 = _getch();
+                        if(ch2== '\r'){
+                            if(enteredPassword.empty()){
+                                cout<<"\n\t\tYou need to enter at least 1 character."
+                                      "\n\t\tPlease try again:";
+                                i=0;
+                                continue;
+                            }
+                            else
+                                break;
+                        }
+                        else if (ch2 == '\b'){
+                            if(!enteredPassword.empty()){
+                                cout<<"\b \b";
+                                enteredPassword.erase(enteredPassword.size()-1);
+                                i--;
+                            }
+                            else{
+                                cout<<"\n\t\t You need to enter at least 1 character."
+                                      "\n\t\tPlease try again:";
+                                i=0;
+                                continue;
+                            }
+                        }
+                        else{
+                            cout<<"*";
+                            enteredPassword += ch2;
+                            i++;
+                        }
                     }
-                }
-                if (!flag){
+                    fflush(stdin);
+                    while (sqlite3_step(statement) == SQLITE_ROW) {
+                        if (username == (char*)sqlite3_column_text(statement, 0) &&
+                            enteredPassword == (char*)sqlite3_column_text(statement, 1)) {
+                            cout << "\n\n\t\tLogin successful.";
+                            sqlite3_finalize(statement);
+                            sqlite3_close(DB);
+                            return 1;
+                        }
+                    }
+
+                    cout << "\n\n\t\tLogin failed. Please try again.";
                     sqlite3_finalize(statement);
                     sqlite3_close(DB);
-                    goto flag;
+                    return 3;
                 }
-
-                cout << "\n\n\t\tLogin failed. Please try again.";
-                sqlite3_finalize(statement);
-                sqlite3_close(DB);
-                return 3;
             }
+
             if (response == 2){
                 sqlite3_finalize(statement);
                 sqlite3_close(DB);
@@ -108,10 +139,11 @@ int Admin::login(){
             }
         }
     }
-    flag:
+
     cout<<"\n\n\t\tThere is no admin in the system."
           "\n\t\tYou are redirecting to admin registration page."
           "\n\t\tEnter any button and enter to continue.";
+    getch();
     createAdmin();
     return 4;
 }
@@ -268,11 +300,13 @@ void Admin::createAdmin() {
     if (result != SQLITE_OK)
         throw invalid_argument("Cannot open database");
     else {
-        string query = "INSERT INTO Admin (username, password) VALUES (?, ?);";
+        string query = "INSERT INTO Admin (user_name, password) VALUES (?, ?);";
         sqlite3_stmt* statement;
         result = sqlite3_prepare_v2(DB, query.c_str(), -1, &statement, 0);
-        if (result != SQLITE_OK)
-            throw invalid_argument("Cannot prepare statement");
+        if (result != SQLITE_OK){
+            const char* errorMessage = sqlite3_errmsg(DB);
+            throw invalid_argument("Cannot prepare statement" + string(errorMessage));
+        }
         else {
             cout<<"\n\n\t\tEnter username: ";
             string userName;
@@ -293,4 +327,38 @@ void Admin::createAdmin() {
                 cout << "\n\n\t\tAdmin created successfully.";
         }
     }
+}
+
+bool Admin::checkAdmin() {
+    bool existOrNot = false;
+    sqlite3 *DB;
+    int result = sqlite3_open("Railway Reservation System.db", &DB);
+    if (result != SQLITE_OK){
+        const char* errorMessage = sqlite3_errmsg(DB);
+        throw invalid_argument("Cannot open database: " + string(errorMessage));
+    }
+    else{
+        string query = "SELECT COUNT(*) FROM admin";
+        sqlite3_stmt *statement;
+        result = sqlite3_prepare_v2(DB, query.c_str(), -1, &statement, 0);
+        if (result != SQLITE_OK){
+            const char* errorMessage = sqlite3_errmsg(DB);
+            throw invalid_argument("Cannot prepare statement: " + string(errorMessage));
+        }
+        else{
+            result = sqlite3_step(statement);
+            if(result == SQLITE_ROW){
+                int rowCount = sqlite3_column_int(statement, 0);
+                if (rowCount > 0)
+                    existOrNot = true;
+            }
+            else{
+                const char* errorMessage = sqlite3_errmsg(DB);
+                throw invalid_argument("Cannot execute statement: " + string(errorMessage));
+            }
+        }
+        sqlite3_finalize(statement);
+    }
+    sqlite3_close(DB);
+    return existOrNot;
 }
