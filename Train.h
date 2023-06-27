@@ -17,9 +17,12 @@ public:
     void setTrainName ( string name );
     void setYear ( int year );
     void setMonth ( int month );
-    void setDay ( int day, int month );
-    void setTime ( int hour, int minute );
+    void setDay ( int day);
+    void setDate ( string date );
+    void setTime ( string time );
     void setNewID ( int id );
+    void setDeletionID( int id );
+    void setChangeID( int id );
     int getID () const;
     int getSeat () const;
     string getName () const;
@@ -29,14 +32,15 @@ public:
     int getHour () const;
     int getMinute () const;
     int getNewID () const;
-    bool addTrainToDatabase (int id, int seat, string name, int year, int month, int day, int hour, int minute);
+    bool addTrainToDatabase (int id, int seat, string name, string date, string time);
     void addNewTableToDataBase(int id);
     bool deleteTrainFromDatabase (int id);
     void deleteTableFromDatabase(int id);
-    bool changeTrainInformationInDatabase (int id, int seat, string name, int year, int month, int day, int hour, int minute, int newid);
+    bool changeTrainInformationInDatabase (int id, int seat, string name, string date, string time, int newid);
     void changeTableInDatabase(int id, int newid);
     void readInformation ();
     void printInformation ();
+    void printTrain(int id);
 private:
     int ID;
     int trainSeat;
@@ -47,6 +51,8 @@ private:
     int trainDepartureHour;
     int trainDepartureMinute;
     int newID;
+    int deletionID;
+    int changeID;
 protected:
     vector <int> ids;
     vector <int> seats;

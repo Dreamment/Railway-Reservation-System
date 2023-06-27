@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <conio.h>
+#include <regex>
 #include "Admin.h"
 #include "Train.h"
 #include "Passenger.h"
@@ -36,13 +37,14 @@ int main (){
             char ch = _getch();
             fflush(stdin);
             int response = ch - '0';
+            cout << response;
             while(response != 1 && response != 2 && response != 3 && response != 4 && response != 0){
                 cout<<"\n\t\tInvalid option. Please try again: ";
                 ch = _getch();
                 fflush(stdin);
                 response = ch - '0';
+                cout << response;
             }
-
             while(response == 1){
                 system ("cls");
                 cout<<"\n\n\t\tRailway Reservation System"
@@ -86,45 +88,96 @@ int main (){
                     system ("cls");
                     cout<<"\n\n\t\tRailway Reservation System"
                           "\n\t\tAdd Train Menu";
+                    Train myTrain;
+
                     int trainId = 0;
                     cout<<"\n\t\tEnter the train id:";
                     cin>>trainId;
+                    fflush(stdin);
+                    try{
+                        myTrain.setTrainID(trainId);
+                    }
+                    catch (invalid_argument &e){
+                        cerr<<"\n\n\t\tError while setting train id: "<<e.what();
+                        cout<<"\n\t\tPress any key to continue...";
+                        _getch();
+                        break;
+                    }
 
                     int trainSeat = 0;
                     cout<<"\n\t\tEnter the train seat:";
                     cin>>trainSeat;
+                    fflush(stdin);
+                    try{
+                        myTrain.setTrainSeat(trainSeat);
+                    }
+                    catch (invalid_argument &e){
+                        cerr<<"\n\n\t\tError while setting train seat: "<<e.what();
+                        cout<<"\n\t\tPress any key to continue...";
+                        _getch();
+                        break;
+                    }
 
                     string trainName;
                     cout<<"\n\t\tEnter the train name:";
-                    cin>>trainName;
+                    getline(cin, trainName);
+                    fflush(stdin);
+                    try{
+                        myTrain.setTrainName(trainName);
+                    }
+                    catch (invalid_argument &e){
+                        cerr<<"\n\n\t\tError while setting train name: "<<e.what();
+                        cout<<"\n\t\tPress any key to continue...";
+                        _getch();
+                        break;
+                    }
 
+                    regex dateRegex("([0-9]{2})\\.([0-9]{2})\\.([0-9]{4})");
                     string trainDepartureDate;
-                    cout<<"\n\t\tEnter the train departure date(DD/MM/YYYY):";
-                    cin>>trainDepartureDate;
+                    cout<<"\n\t\tEnter the train departure date(DD.MM.YYYY): ";
+                    getline(cin,trainDepartureDate);
+                    fflush(stdin);
+                    while(!regex_match(trainDepartureDate, dateRegex)){
+                        cout<<"\n\t\tInvalid date format. Please try again(DD.MM.YYYY): ";
+                        getline(cin,trainDepartureDate);
+                        fflush(stdin);
+                    }
+                    try{
+                        myTrain.setDate(trainDepartureDate);
+                    }
+                    catch (invalid_argument &e){
+                        cerr<<"\n\n\t\tError while setting date: "<<e.what();
+                        cout<<"\n\t\tPress any key to continue...";
+                        _getch();
+                        break;
+                    }
 
-                    int day = stoi(trainDepartureDate.substr(0,2));
-                    int month = stoi(trainDepartureDate.substr(3,2));
-                    int year = stoi(trainDepartureDate.substr(6,4));
-
+                    regex timeRegex("([0-9]{2}):([0-9]{2})");
                     string trainDepartureTime;
-                    cout<<"\n\t\tEnter the train departure time(MM:HH):";
-                    cin>>trainDepartureTime;
-
-                    int hour = stoi(trainDepartureTime.substr(0,2));
-                    int minute = stoi(trainDepartureTime.substr(3,2));
+                    cout<<"\n\t\tEnter the train departure time(HH:MM): ";
+                    getline(cin, trainDepartureTime);
+                    fflush(stdin);
+                    while(!regex_match(trainDepartureTime, timeRegex)){
+                        cout<<"\n\t\tInvalid time format. Please try again: ";
+                        getline(cin,trainDepartureTime);
+                        fflush(stdin);
+                    }
+                    try{
+                        myTrain.setTime(trainDepartureTime);
+                    }
+                    catch (invalid_argument &e){
+                        cerr<<"\n\n\t\tError while setting time: "<<e.what();
+                        cout<<"\n\t\tPress any key to continue...";
+                        _getch();
+                        break;
+                    }
 
                     bool check = false;
                     try {
-                        Train myTrain(trainId, trainSeat, trainName, year, month, day, hour, minute);
-                        try {
-                            check = myTrain.addTrainToDatabase(trainId, trainSeat, trainName, year, month, day, hour, minute);
-                        }
-                        catch (invalid_argument &e){
-                            cerr<<"\n\n\t\tError while writing train information: "<<e.what();
-                        }
+                        check = myTrain.addTrainToDatabase(trainId, trainSeat, trainName, trainDepartureDate, trainDepartureTime);
                     }
                     catch (invalid_argument &e){
-                        cerr<<"\n\n\t\tError while creating train object: "<<e.what();
+                        cerr<<"\n\n\t\tError while writing train information: "<<e.what();
                     }
 
                     if (check){
@@ -149,22 +202,49 @@ int main (){
                     system ("cls");
                     cout<<"\n\n\t\tRailway Reservation System"
                           "\n\t\tDelete Train Menu";
+                    Train myTrain;
+
                     int trainId = 0;
                     cout<<"\n\t\tEnter the train id which you want to delete:";
                     cin>>trainId;
 
-                    bool check = false;
-                    try {
-                        Train myTrain;
-                        try {
-                            check = myTrain.deleteTrainFromDatabase(trainId);
-                        }
-                        catch (invalid_argument &e){
-                            cerr<<"\n\n\t\tError while deleting train information: "<<e.what();
-                        }
+                    try{
+                        myTrain.setDeletionID(trainId);
                     }
                     catch (invalid_argument &e){
-                        cerr<<"\n\n\t\tError while creating train object: "<<e.what();
+                        cerr<<"\n\n\t\tError while setting id: "<<e.what();
+                        cout<<"\n\t\tPress any key to continue...";
+                        _getch();
+                        break;
+                    }
+                    cout<<endl;
+                    myTrain.printTrain(trainId);
+                    cout<<"\n\n\t\tAre you sure you want to delete this train? (Y/N): ";
+                    char ch3 = _getch();
+                    fflush(stdin);
+                    cout<<ch3;
+                    while(ch3 != 'Y' && ch3 != 'y' && ch3 != 'N' && ch3 != 'n'){
+                        cout<<"\n\t\tInvalid option. Please try again: ";
+                        ch3 = _getch();
+                        fflush(stdin);
+                        cout<<ch3;
+                    }
+                    if(ch3 == 'n' || ch3 == 'N'){
+                        cout<<"\n\t\tTrain not deleted.";
+                        cout<<"\n\t\tPress any key to continue...";
+                        _getch();
+                        break;
+                    }
+
+                    bool check = false;
+                    try {
+                        check = myTrain.deleteTrainFromDatabase(trainId);
+                    }
+                    catch (invalid_argument &e){
+                        cerr<<"\n\n\t\tError while deleting train information: "<<e.what();
+                        cout<<"\n\t\tPress any key to continue...";
+                        _getch();
+                        break;
                     }
 
                     if (check){
@@ -175,12 +255,15 @@ int main (){
                     }
 
                     cout<<"\n\n\t\tDo you want to delete another train? (Y/N): ";
-                    char ch3 = _getch();
+                    ch3 = '\0';
+                    ch3 = _getch();
+                    cout << ch3;
                     fflush(stdin);
                     while (ch3 != 'Y' && ch3 != 'y' && ch3 != 'N' && ch3 != 'n'){
                         cout<<"\n\t\tInvalid option. Please try again: ";
                         ch3 = _getch();
                         fflush(stdin);
+                        cout<<ch3;
                     }
                     if (ch3 == 'n' || ch3 == 'N')
                         break;
@@ -189,72 +272,140 @@ int main (){
                     system("cls");
                     cout<<"\n\n\t\tRailway Reservation System"
                           "\n\t\tChange Train Menu";
+                    Train myTrain;
 
                     int trainId = 0;
                     cout<<"\n\t\tEnter the train id which you want to change:";
                     cin>>trainId;
+                    fflush(stdin);
+                    try{
+                        myTrain.setChangeID(trainId);
+                    }
+                    catch (invalid_argument &e){
+                        cerr<<"\n\n\t\tError while setting id: "<<e.what();
+                        cout<<"\n\t\tPress any key to continue...";
+                        _getch();
+                        break;
+                    }
+                    cout<<endl;
+                    myTrain.printTrain(trainId);
+                    cout<<"\n\n\t\tDo you want to change this train? (Y/N): ";
+                    char ch3 = _getch();
+                    fflush(stdin);
+                    cout<<ch3;
+                    while(ch3 != 'Y' && ch3 != 'y' && ch3 != 'N' && ch3 != 'n'){
+                        cout<<"\n\t\tInvalid option. Please try again: ";
+                        ch3 = _getch();
+                        fflush(stdin);
+                        cout<<ch3;
+                    }
+                    if(ch3 == 'n' || ch3 == 'N')
+                        break;
+                    cout<<"\n\n\t\tEnter the new train information ";
 
                     int newTrainId = 0;
                     cout<<"\n\t\tEnter the new train id(Enter -1 if you don't want to change):";
                     cin>>newTrainId;
+                    fflush(stdin);
+                    while(newTrainId < -1 || newTrainId == 0){
+                        cout<<"\n\t\tTrain new id cannot be less than 1:";
+                        cin>>newTrainId;
+                        fflush(stdin);
+                    }
+                    try{
+                        myTrain.setNewID(newTrainId);
+                    }
+                    catch (invalid_argument &e){
+                        cerr<<"\n\n\t\tError while setting new id: "<<e.what();
+                        cout<<"\n\t\tPress any key to continue...";
+                        _getch();
+                        break;
+                    }
 
                     int newTrainSeat = 0;
-                    cout<<"\n\t\tEnter the new train seat(Enter -1 if you don't want to change):";
+                    cout<<"\n\t\tEnter the new train seat(Enter -1 if you don't want to change): ";
                     cin>>newTrainSeat;
+                    fflush(stdin);
+                    try{
+                        if(newTrainSeat != -1)
+                            myTrain.setTrainSeat(newTrainSeat);
+                        else{
+                            myTrain.setTrainSeat(1);
+                        }
+                    }
+                    catch (invalid_argument &e){
+                        cerr<<"\n\n\t\tError while setting train seat: "<<e.what();
+                        cout<<"\n\t\tPress any key to continue...";
+                        _getch();
+                        break;
+                    }
 
                     string newTrainName;
-                    cout<<"\n\t\tEnter the new train name(Enter -1 if you don't want to change):";
+                    cout<<"\n\t\tEnter the new train name(Enter -1 if you don't want to change): ";
                     cin>>newTrainName;
-                    if (newTrainName == "-1")
-                        newTrainName = "";
+                    fflush(stdin);
+                    try{
+                        if (newTrainName != "-1")
+                            myTrain.setTrainName(newTrainName);
+                        else{
+                            myTrain.setTrainName(" ");
+                        }
+                    }
+                    catch (invalid_argument &e){
+                        cerr<<"\n\n\t\tError while setting train name: "<<e.what();
+                        cout<<"\n\t\tPress any key to continue...";
+                        _getch();
+                        break;
+                    }
 
                     string newTrainDepartureDate;
-                    cout<<"\n\t\tEnter the new train departure date(DD/MM/YYYY)(Enter -1 if you don't want to change):";
-                    cin>>newTrainDepartureDate;
-
-                    int year = 0;
-                    int month = 0;
-                    int day = 0;
-                    if (newTrainDepartureDate == "-1"){
-                        year = -1;
-                        month = -1;
-                        day = -1;
+                    regex dateRegex("([0-9]{2})\\.([0-9]{2})\\.([0-9]{4})");
+                    cout<<"\n\t\tEnter the new train departure date(DD.MM.YYYY)(Enter -1 if you don't want to change): ";
+                    getline(cin, newTrainDepartureDate);
+                    fflush(stdin);
+                    while(newTrainDepartureDate != "-1" && !regex_match(newTrainDepartureDate, dateRegex)){
+                        cout<<"\n\t\tInvalid date format. Please try again: ";
+                        getline(cin, newTrainDepartureDate);
+                        fflush(stdin);
                     }
-                    else{
-                        day = stoi(newTrainDepartureDate.substr(0,2));
-                        month = stoi(newTrainDepartureDate.substr(3,2));
-                        year = stoi(newTrainDepartureDate.substr(6,4));
+                    try{
+                        myTrain.setDate(newTrainDepartureDate);
+                    }
+                    catch (invalid_argument &e){
+                        cerr<<"\n\n\t\tError while setting date: "<<e.what();
+                        cout<<"\n\t\tPress any key to continue...";
+                        _getch();
+                        break;
                     }
 
+                    regex timeRegex("([0-9]{2}):([0-9]{2})");
                     string newTrainDepartureTime;
-                    cout<<"\n\t\tEnter the new train departure time(MM:HH)(Enter -1 if you don't want to change):";
-                    cin>>newTrainDepartureTime;
-
-                    int hour = 0;
-                    int minute = 0;
-                    if (newTrainDepartureTime == "-1"){
-                        hour = -1;
-                        minute = -1;
+                    cout<<"\n\t\tEnter the new train departure time(HH:MM)(Enter -1 if you don't want to change):";
+                    getline(cin, newTrainDepartureTime);
+                    fflush(stdin);
+                    while(newTrainDepartureTime != "-1" && !regex_match(newTrainDepartureTime, timeRegex)){
+                        cout<<"\n\t\tInvalid time format. Please try again(HH:MM): ";
+                        getline(cin, newTrainDepartureTime);
+                        fflush(stdin);
                     }
-                    else{
-                        hour = stoi(newTrainDepartureTime.substr(0,2));
-                        minute = stoi(newTrainDepartureTime.substr(3,2));
+                    try{
+                        myTrain.setTime(newTrainDepartureTime);
+                    }
+                    catch (invalid_argument &e){
+                        cerr<<"\n\n\t\tError while setting time: "<<e.what();
+                        cout<<"\n\t\tPress any key to continue...";
+                        _getch();
+                        break;
                     }
 
                     bool check = false;
                     try {
-                        Train myTrain;
-                        try {
-                            check = myTrain.changeTrainInformationInDatabase(trainId, newTrainSeat,
-                                                                             newTrainName, year, month, day, hour,
-                                                                             minute, newTrainId);
-                        }
-                        catch (invalid_argument &e){
-                            cerr<<"\n\n\t\tError while changing train information: "<<e.what();
-                        }
+                        check = myTrain.changeTrainInformationInDatabase(trainId, newTrainSeat, newTrainName,
+                                                                         newTrainDepartureDate, newTrainDepartureTime,
+                                                                         newTrainId);
                     }
                     catch (invalid_argument &e){
-                        cerr<<"\n\n\t\tError while creating train object: "<<e.what();
+                        cerr<<"\n\n\t\tError while changing train information: "<<e.what();
                     }
 
                     if (check){
@@ -265,12 +416,15 @@ int main (){
                     }
 
                     cout<<"\n\n\t\tDo you want to change another train? (Y/N): ";
-                    char ch3 = _getch();
+                    ch3 = '\0';
+                    ch3 = _getch();
                     fflush(stdin);
+                    cout<<ch3;
                     while (ch3 != 'Y' && ch3 != 'y' && ch3 != 'N' && ch3 != 'n'){
                         cout<<"\n\t\tInvalid option. Please try again: ";
                         ch3 = _getch();
                         fflush(stdin);
+                        cout<<ch3;
                     }
                     if (ch3 == 'n' || ch3 == 'N')
                         break;
@@ -288,6 +442,7 @@ int main (){
                     break;
                 }
             }
+            // TODO:Fix Passenger Menu
             while(response == 2){
                 system("cls");
                 cout<<"\n\n\t\tRailway Reservation System"
