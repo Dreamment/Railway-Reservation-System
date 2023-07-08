@@ -11,7 +11,7 @@ public:
                        int passengerNewSeat = 1);
     ~Passenger();
     void setPassengerTrainID(int id);
-    void setPassengerId(const string& id);
+    void setPassengerId(string id);
     void setPassengerName(string name);
     void setPassengerSurname(string surname);
     void setPassengerSeat(int seat);
@@ -25,6 +25,9 @@ public:
     bool checkPassengerId(int id, string ID);
     void readPassengerInformation(int id);
     void printPassengerInformation(int id);
+    bool checkSeat(int seat);
+    void printPassenger(int trainId, string passengerId);
+    void orderPassengers();
 private:
     int trainId;
     string passengerId;
